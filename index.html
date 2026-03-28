@@ -52,9 +52,9 @@
             justify-content: center;
         }
 
-        /* ----- PHẦN VÒNG QUAY KHỔNG LỒ ----- */
+        /* ----- PHẦN VÒNG QUAY (TRỊ LỖI SAFARI) ----- */
         .wheel-section {
-            flex: 1; /* Cho phép cột vòng quay chiếm tối đa không gian còn lại (khoảng 70-75%) */
+            flex: 1; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -65,10 +65,11 @@
 
         .wheel-outer-rim {
             position: relative;
-            width: 100%;
-            max-width: 82vh; /* Kéo to hết cỡ theo chiều cao màn hình để không bị lố thanh cuộn */
-            aspect-ratio: 1 / 1; /* CHỐNG ELIP: Bắt buộc chiều ngang = chiều dọc */
-            flex-shrink: 0; /* CHỐNG ELIP: Cấm trình duyệt bóp méo vòng quay */
+            /* CÁCH TRỊ SAFARI: Ép cứng width và height bằng nhau tuyệt đối.
+               Lấy giá trị nhỏ hơn giữa 75% chiều cao hoặc 55% chiều ngang màn hình */
+            width: min(75vh, 55vw);
+            height: min(75vh, 55vw);
+            flex-shrink: 0; /* Cấm bóp méo */
             
             border-radius: 50%;
             background: linear-gradient(145deg, #f0f5fa, #c9d0d8);
@@ -322,11 +323,9 @@
 
             .wheel-outer-rim {
                 padding: 15px;
-                /* TRÊN ĐIỆN THOẠI: Vòng quay to kịch trần (92% viền màn hình ngang) */
-                width: 92vw;
-                max-width: none;
-                height: auto; 
-                aspect-ratio: 1 / 1;
+                /* BẢO ĐẢM TRÒN VO TRÊN ĐIỆN THOẠI */
+                width: 90vw;
+                height: 90vw;
             }
 
             .pointer {
