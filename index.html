@@ -94,7 +94,7 @@
             transition: transform 0.1s;
         }
 
-        /* Mũi tên 3D (Đã sửa hướng quay vào trong) */
+        /* Mũi tên 3D */
         .pointer {
             position: absolute;
             top: 50%;
@@ -106,6 +106,13 @@
             clip-path: polygon(0 50%, 100% 0, 100% 100%);
             z-index: 15;
             filter: drop-shadow(-8px 8px 8px rgba(0,0,0,0.3));
+            transition: transform 0.05s ease-out; /* Hiệu ứng nảy mũi tên */
+            transform-origin: right center;
+        }
+
+        /* Khi mũi tên nảy lên */
+        .pointer.tick {
+            transform: translateY(-50%) rotate(15deg);
         }
 
         /* Nút quay 3D */
@@ -289,7 +296,7 @@
                 <div class="wheel-inner-rim">
                     <canvas id="canvas" width="1200" height="1200"></canvas>
                 </div>
-                <div class="pointer"></div>
+                <div class="pointer" id="pointer"></div>
                 <div class="spin-btn" id="spin-btn">QUAY</div>
             </div>
         </div>
@@ -319,6 +326,7 @@ Thành viên G</textarea>
         const namesInput = document.getElementById('names-input');
         const entryCount = document.getElementById('entry-count');
         const spinBtn = document.getElementById('spin-btn');
+        const pointer = document.getElementById('pointer');
         
         const colors = [
             "#FF5A5F", "#3BCEAC", "#FFC857", "#2D93AD", 
@@ -331,6 +339,60 @@ Thành viên G</textarea>
         let isSpinning = false;
         let spinVelocity = 0;
         let animationFrame;
+        let lastPassedIndex = -1; // Biến theo dõi ô vừa đi qua để phát âm thanh
+
+        // ----- HỆ THỐNG ÂM THANH (KHÔNG CẦN FILE MP3) -----
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        // Âm thanh tích tắc khi quay
+        function playTickSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+            
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+            
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.05);
+
+            // Hiệu ứng mũi tên nảy lên
+            pointer.classList.add('tick');
+            setTimeout(() => { pointer.classList.remove('tick'); }, 50);
+        }
+
+        // Âm thanh khi chiến thắng (Hợp âm rộn ràng)
+        function playWinSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            // Các tần số tạo thành một hợp âm chiến thắng
+            const chords = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            chords.forEach((freq, index) => {
+                setTimeout(() => {
+                    const osc = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    osc.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    
+                    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+                    
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 1.5);
+                }, index * 80); // Phát liên tiếp tạo hiệu ứng Tada!
+            });
+        }
+        // --------------------------------------------------
 
         function updateNames() {
             const text = namesInput.value;
@@ -392,19 +454,38 @@ Thành viên G</textarea>
             }
         }
 
+        // Tính toán vị trí hiện tại của mũi tên
+        function getCurrentIndex() {
+            if (names.length === 0) return -1;
+            const sliceAngle = (2 * Math.PI) / names.length;
+            const normalizedAngle = (currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+            return Math.floor(((2 * Math.PI - normalizedAngle) % (2 * Math.PI)) / sliceAngle);
+        }
+
         function spinWheel() {
             if (isSpinning || names.length === 0) return;
-            isSpinning = true;
             
-            spinVelocity = Math.random() * 0.2 + 0.45; 
+            // Kích hoạt AudioContext khi người dùng tương tác (quy định của trình duyệt)
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            isSpinning = true;
+            spinVelocity = Math.random() * 0.2 + 0.5; // Tăng lực xoay nhẹ cho đã
+            lastPassedIndex = getCurrentIndex();
             
             function animate() {
                 currentAngle += spinVelocity;
-                spinVelocity *= 0.983; 
+                spinVelocity *= 0.985; // Lực ma sát làm chậm dần
 
                 drawWheel();
 
-                if (spinVelocity > 0.002) {
+                // Kiểm tra xem mũi tên có chuyển sang ô mới không để phát tiếng
+                let currentIndex = getCurrentIndex();
+                if (currentIndex !== lastPassedIndex) {
+                    playTickSound();
+                    lastPassedIndex = currentIndex;
+                }
+
+                if (spinVelocity > 0.0015) {
                     animationFrame = requestAnimationFrame(animate);
                 } else {
                     isSpinning = false;
@@ -416,11 +497,12 @@ Thành viên G</textarea>
         }
 
         function announceWinner() {
-            const sliceAngle = (2 * Math.PI) / names.length;
-            const normalizedAngle = (currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-            const winningIndex = Math.floor(((2 * Math.PI - normalizedAngle) % (2 * Math.PI)) / sliceAngle);
-            const winner = names[winningIndex];
+            const winner = names[getCurrentIndex()];
 
+            // Phát âm thanh chiến thắng
+            playWinSound();
+
+            // Hiệu ứng pháo giấy rực rỡ
             confetti({
                 particleCount: 250,
                 spread: 120,
