@@ -60,13 +60,19 @@
             align-items: center;
             position: relative;
             width: 100%;
+            padding: 10px;
         }
 
         .wheel-outer-rim {
             position: relative;
-            width: 100%;
-            max-width: min(90vw, 75vh); 
-            aspect-ratio: 1/1;
+            /* FIX ELIP: Ép chiều rộng và cao bằng đúng 1 giá trị biến số để luôn là hình tròn hoàn hảo */
+            --wheel-size: min(90vw, 70vh);
+            width: var(--wheel-size);
+            height: var(--wheel-size);
+            max-width: 650px;
+            max-height: 650px;
+            flex-shrink: 0; /* NGĂN TRÌNH DUYỆT BÓP MÉO */
+            
             border-radius: 50%;
             background: linear-gradient(145deg, #f0f5fa, #c9d0d8);
             box-shadow:  30px 30px 60px #b8bfc7, 
@@ -160,7 +166,7 @@
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            gap: 25px; /* Khoảng cách giữa phần nhập tên và phần link */
+            gap: 25px;
         }
 
         /* ----- PHẦN NHẬP TÊN ----- */
@@ -173,7 +179,7 @@
             padding: 25px;
             box-shadow:  15px 15px 30px #b8bfc7, 
                         -15px -15px 30px #ffffff;
-            height: 70vh; /* Giảm một chút để nhường chỗ cho khối link phía dưới */
+            height: 70vh;
             max-height: 650px;
         }
 
@@ -319,6 +325,10 @@
 
             .wheel-outer-rim {
                 padding: 15px;
+                /* FIX ELIP MẶT ĐIỆN THOẠI: Khóa cứng tỷ lệ vuông */
+                --wheel-size: 90vw;
+                width: var(--wheel-size);
+                height: var(--wheel-size);
             }
 
             .pointer {
