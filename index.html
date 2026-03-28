@@ -154,10 +154,18 @@
                         inset 0 8px 15px rgba(0,0,0,0.2);
         }
 
-        /* ----- PHẦN NHẬP TÊN (CỘT NHỎ) ----- */
-        .input-section {
+        /* ----- CỘT BÊN PHẢI (CHỨA DANH SÁCH & LIÊN KẾT) ----- */
+        .sidebar {
             width: 320px;
             flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 25px; /* Khoảng cách giữa phần nhập tên và phần link */
+        }
+
+        /* ----- PHẦN NHẬP TÊN ----- */
+        .input-section {
+            width: 100%;
             display: flex;
             flex-direction: column;
             background: #e0e5ec;
@@ -165,8 +173,8 @@
             padding: 25px;
             box-shadow:  15px 15px 30px #b8bfc7, 
                         -15px -15px 30px #ffffff;
-            height: 80vh;
-            max-height: 800px;
+            height: 70vh; /* Giảm một chút để nhường chỗ cho khối link phía dưới */
+            max-height: 650px;
         }
 
         .input-header {
@@ -251,6 +259,46 @@
             transform: translateY(6px);
         }
 
+        /* ----- PHẦN LIÊN KẾT FONT 3D ----- */
+        .links-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #e0e5ec;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow:  10px 10px 20px #b8bfc7, 
+                        -10px -10px 20px #ffffff;
+        }
+
+        .links-section a {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 800;
+            font-size: 15px;
+            padding: 14px;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #f0f5fa, #c9d0d8);
+            box-shadow: 5px 5px 10px #b8bfc7, -5px -5px 10px #ffffff;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .links-section a:hover {
+            color: #3498db;
+            border-color: rgba(52, 152, 219, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 8px 8px 15px #b8bfc7, -8px -8px 15px #ffffff;
+        }
+
+        .links-section a:active {
+            transform: translateY(2px);
+            box-shadow: inset 4px 4px 8px #b8bfc7, inset -4px -4px 8px #ffffff;
+        }
+
         /* ==========================================
            GIAO DIỆN TỰ ĐỘNG CHO ĐIỆN THOẠI (RESPONSIVE) 
            ========================================== */
@@ -262,6 +310,11 @@
                 flex-direction: column;
                 gap: 30px;
                 padding: 10px 15px 30px;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-width: 500px;
             }
 
             .wheel-outer-rim {
@@ -282,8 +335,6 @@
             }
 
             .input-section {
-                width: 100%;
-                max-width: 500px;
                 height: 400px; 
                 padding: 20px;
             }
@@ -315,12 +366,13 @@
             </div>
         </div>
 
-        <div class="input-section">
-            <div class="input-header">
-                <h2>Danh Sách</h2>
-                <span class="count-badge" id="entry-count">0</span>
-            </div>
-            <textarea id="names-input" placeholder="Nhập tên vào đây, mỗi dòng 1 tên...">Tý
+        <div class="sidebar">
+            <div class="input-section">
+                <div class="input-header">
+                    <h2>Danh Sách</h2>
+                    <span class="count-badge" id="entry-count">0</span>
+                </div>
+                <textarea id="names-input" placeholder="Nhập tên vào đây, mỗi dòng 1 tên...">Tý
 Sửu
 Dần
 Mão
@@ -332,9 +384,15 @@ Thân
 Dậu
 Tuất
 Hợi</textarea>
-            <div class="controls">
-                <button class="btn btn-shuffle" id="shuffle-btn">Xáo trộn</button>
-                <button class="btn btn-clear" id="clear-btn">Xóa hết</button>
+                <div class="controls">
+                    <button class="btn btn-shuffle" id="shuffle-btn">Xáo trộn</button>
+                    <button class="btn btn-clear" id="clear-btn">Xóa hết</button>
+                </div>
+            </div>
+
+            <div class="links-section">
+                <a href="https://docs.google.com/spreadsheets/d/1FJZfdUx50TFt2mWM11f9i2Lm8f2Bsxum/edit?usp=sharing&ouid=108759078861426831168&rtpof=true&sd=true" target="_blank">📚 Bộ font Việt Hoá 4500 Font</a>
+                <a href="https://docs.google.com/spreadsheets/d/1LCw8ESaDGv3I9PAAimqbUHFhhIUR6CWmPdkkwObyQYY/edit?usp=sharing" target="_blank">🔥 Bộ font Việt hoá Tháng 1-T6/2026</a>
             </div>
         </div>
     </main>
@@ -360,7 +418,6 @@ Hợi</textarea>
         let animationFrame;
         let lastPassedIndex = -1; 
 
-        // ----- HỆ THỐNG ÂM THANH -----
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const audioCtx = new AudioContext();
 
@@ -458,13 +515,11 @@ Hợi</textarea>
                 ctx.shadowOffsetY = 2;
 
                 ctx.fillStyle = '#ffffff';
-                // Đã chỉnh lại kích thước chữ thành 50px để vừa vặn khi có 12 ô trên điện thoại
                 ctx.font = '800 50px "Be Vietnam Pro"';
                 
                 let text = names[i];
                 if (text.length > 22) text = text.substring(0, 20) + '...';
                 
-                // Đẩy chữ ra ngoài một chút cho cân đối
                 ctx.fillText(text, radius - 60, 0);
                 ctx.restore();
             }
