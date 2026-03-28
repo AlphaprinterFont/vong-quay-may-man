@@ -52,7 +52,7 @@
             justify-content: center;
         }
 
-        /* ----- PHẦN VÒNG QUAY (TRỊ LỖI SAFARI) ----- */
+        /* ----- PHẦN VÒNG QUAY ----- */
         .wheel-section {
             flex: 1; 
             display: flex;
@@ -65,12 +65,9 @@
 
         .wheel-outer-rim {
             position: relative;
-            /* CÁCH TRỊ SAFARI: Ép cứng width và height bằng nhau tuyệt đối.
-               Lấy giá trị nhỏ hơn giữa 75% chiều cao hoặc 55% chiều ngang màn hình */
             width: min(75vh, 55vw);
             height: min(75vh, 55vw);
-            flex-shrink: 0; /* Cấm bóp méo */
-            
+            flex-shrink: 0; 
             border-radius: 50%;
             background: linear-gradient(145deg, #f0f5fa, #c9d0d8);
             box-shadow:  30px 30px 60px #b8bfc7, 
@@ -158,7 +155,7 @@
                         inset 0 8px 15px rgba(0,0,0,0.2);
         }
 
-        /* ----- CỘT BÊN PHẢI (CHỨA DANH SÁCH & LIÊN KẾT) ----- */
+        /* ----- CỘT BÊN PHẢI ----- */
         .sidebar {
             width: 320px;
             flex-shrink: 0;
@@ -263,7 +260,7 @@
             transform: translateY(6px);
         }
 
-        /* ----- PHẦN LIÊN KẾT FONT 3D ----- */
+        /* ----- PHẦN LIÊN KẾT ----- */
         .links-section {
             width: 100%;
             display: flex;
@@ -303,9 +300,7 @@
             box-shadow: inset 4px 4px 8px #b8bfc7, inset -4px -4px 8px #ffffff;
         }
 
-        /* ==========================================
-           GIAO DIỆN TỰ ĐỘNG CHO ĐIỆN THOẠI (RESPONSIVE) 
-           ========================================== */
+        /* ----- RESPONSIVE ----- */
         @media (max-width: 800px) {
             header { padding: 10px 15px; }
             header h1 { font-size: 24px; }
@@ -323,7 +318,6 @@
 
             .wheel-outer-rim {
                 padding: 15px;
-                /* BẢO ĐẢM TRÒN VO TRÊN ĐIỆN THOẠI */
                 width: 90vw;
                 height: 90vw;
             }
@@ -425,6 +419,12 @@ Hợi</textarea>
         let animationFrame;
         let lastPassedIndex = -1; 
 
+        // ----- TẢI DỮ LIỆU TỪ LẦN TRƯỚC (NẾU CÓ) -----
+        const savedData = localStorage.getItem('fontVietLinh_wheelData');
+        if (savedData !== null) {
+            namesInput.value = savedData;
+        }
+
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const audioCtx = new AudioContext();
 
@@ -476,6 +476,10 @@ Hợi</textarea>
             const text = namesInput.value;
             names = text.split('\n').map(n => n.trim()).filter(n => n.length > 0);
             entryCount.innerText = names.length;
+            
+            // TỰ ĐỘNG LƯU DANH SÁCH VÀO TRÌNH DUYỆT MỖI KHI CÓ SỰ THAY ĐỔI
+            localStorage.setItem('fontVietLinh_wheelData', text);
+            
             drawWheel();
         }
 
@@ -572,7 +576,8 @@ Hợi</textarea>
         }
 
         function announceWinner() {
-            const winner = names[getCurrentIndex()];
+            const winnerIndex = getCurrentIndex();
+            const winner = names[winnerIndex];
 
             playWinSound();
 
@@ -588,9 +593,18 @@ Hợi</textarea>
                 title: '🎉 XUẤT SẮC 🎉',
                 html: `Chúc mừng người may mắn:<br><br><strong style="font-size: 38px; color: #ff4757; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">${winner}</strong>`,
                 icon: 'success',
-                confirmButtonText: 'Tuyệt vời!',
-                confirmButtonColor: '#2c3e50',
+                showCancelButton: true,
+                confirmButtonText: 'Loại người này',
+                cancelButtonText: 'Giữ lại',
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#2c3e50',
                 backdrop: `rgba(44, 62, 80, 0.6)`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    names.splice(winnerIndex, 1);
+                    namesInput.value = names.join('\n');
+                    updateNames(); // Việc gọi hàm này cũng sẽ kích hoạt lưu tự động danh sách mới
+                }
             });
         }
 
@@ -611,6 +625,8 @@ Hợi</textarea>
         document.getElementById('clear-btn').addEventListener('click', () => {
             if(isSpinning) return;
             namesInput.value = '';
+            // Nút "Xóa hết" giờ chỉ xóa danh sách chứ không khôi phục mặc định
+            // Nếu muốn khôi phục mặc định 12 con giáp, người dùng chỉ cần F5 lại 1 lần sau khi xóa hết
             updateNames();
         });
 
