@@ -65,7 +65,6 @@
         .wheel-outer-rim {
             position: relative;
             width: 100%;
-            /* Tự động tính toán để không bao giờ bị tràn viền màn hình ngang hoặc dọc */
             max-width: min(90vw, 75vh); 
             aspect-ratio: 1/1;
             border-radius: 50%;
@@ -266,17 +265,15 @@
             }
 
             .wheel-outer-rim {
-                padding: 15px; /* Giảm viền ngoài trên đt */
+                padding: 15px;
             }
 
-            /* Thu nhỏ mũi tên cho cân đối với vòng quay đt */
             .pointer {
                 right: -20px;
                 width: 55px;
                 height: 40px;
             }
 
-            /* Thu nhỏ nút quay để không che mất số/chữ */
             .spin-btn {
                 width: 90px;
                 height: 90px;
@@ -287,12 +284,12 @@
             .input-section {
                 width: 100%;
                 max-width: 500px;
-                height: 400px; /* Giảm chiều cao khung nhập trên đt */
+                height: 400px; 
                 padding: 20px;
             }
 
             .controls {
-                flex-direction: row; /* Dàn hàng ngang 2 nút cho tiết kiệm diện tích */
+                flex-direction: row; 
             }
             .btn {
                 padding: 12px;
@@ -323,12 +320,18 @@
                 <h2>Danh Sách</h2>
                 <span class="count-badge" id="entry-count">0</span>
             </div>
-            <textarea id="names-input" placeholder="Nhập tên vào đây, mỗi dòng 1 tên...">45
-46
-47
-48
-49
-50</textarea>
+            <textarea id="names-input" placeholder="Nhập tên vào đây, mỗi dòng 1 tên...">Tý
+Sửu
+Dần
+Mão
+Thìn
+Tỵ
+Ngọ
+Mùi
+Thân
+Dậu
+Tuất
+Hợi</textarea>
             <div class="controls">
                 <button class="btn btn-shuffle" id="shuffle-btn">Xáo trộn</button>
                 <button class="btn btn-clear" id="clear-btn">Xóa hết</button>
@@ -455,14 +458,14 @@
                 ctx.shadowOffsetY = 2;
 
                 ctx.fillStyle = '#ffffff';
-                // ĐÃ TĂNG FONT CHỮ LÊN 65px ĐỂ HIỂN THỊ RÕ TRÊN ĐIỆN THOẠI
-                ctx.font = '800 65px "Be Vietnam Pro"';
+                // Đã chỉnh lại kích thước chữ thành 50px để vừa vặn khi có 12 ô trên điện thoại
+                ctx.font = '800 50px "Be Vietnam Pro"';
                 
                 let text = names[i];
                 if (text.length > 22) text = text.substring(0, 20) + '...';
                 
-                // Đẩy chữ lùi vào trong một chút (radius - 75) để không bị viền cắt ngang
-                ctx.fillText(text, radius - 75, 0);
+                // Đẩy chữ ra ngoài một chút cho cân đối
+                ctx.fillText(text, radius - 60, 0);
                 ctx.restore();
             }
         }
@@ -523,7 +526,7 @@
                 title: '🎉 XUẤT SẮC 🎉',
                 html: `Chúc mừng người may mắn:<br><br><strong style="font-size: 38px; color: #ff4757; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">${winner}</strong>`,
                 icon: 'success',
-                confirmButtonText: 'Quay tiếp thôi!',
+                confirmButtonText: 'Tuyệt vời!',
                 confirmButtonColor: '#2c3e50',
                 backdrop: `rgba(44, 62, 80, 0.6)`
             });
