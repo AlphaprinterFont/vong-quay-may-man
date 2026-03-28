@@ -94,21 +94,21 @@
             transition: transform 0.1s;
         }
 
-        /* Mũi tên 3D (Được phóng to) */
+        /* Mũi tên 3D (Đã sửa hướng quay vào trong) */
         .pointer {
             position: absolute;
             top: 50%;
-            right: -45px;
+            right: -35px;
             transform: translateY(-50%);
             width: 80px;
             height: 55px;
             background: linear-gradient(145deg, #ff4757, #ff6b81);
-            clip-path: polygon(100% 50%, 0 0, 0 100%);
+            clip-path: polygon(0 50%, 100% 0, 100% 100%);
             z-index: 15;
             filter: drop-shadow(-8px 8px 8px rgba(0,0,0,0.3));
         }
 
-        /* Nút quay 3D (Được phóng to) */
+        /* Nút quay 3D */
         .spin-btn {
             position: absolute;
             top: 50%;
