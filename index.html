@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vòng Quay may mắn Font Việt Linh</title>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Vòng Quay may mắn Font Việt Linh - 3D UI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -16,203 +16,257 @@
         }
 
         body {
-            background-color: #f4f7f6;
-            color: #333;
+            /* Background nhám mờ chuẩn 3D UI */
+            background-color: #e0e5ec;
+            color: #2c3e50;
             display: flex;
             flex-direction: column;
             height: 100vh;
+            overflow-x: hidden;
         }
 
         header {
-            background-color: #ffffff;
-            padding: 15px 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px 30px;
             text-align: center;
             z-index: 10;
+            margin-bottom: 10px;
         }
 
         header h1 {
             color: #2c3e50;
-            font-size: 24px;
-            font-weight: 800;
+            font-size: 32px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 3px 3px 6px rgba(163, 177, 198, 0.6), 
+                        -3px -3px 6px rgba(255, 255, 255, 0.8);
         }
 
         .container {
             display: flex;
             flex: 1;
-            padding: 20px;
-            gap: 30px;
-            max-width: 1200px;
+            padding: 10px 30px 40px;
+            gap: 50px;
+            max-width: 1300px;
             margin: 0 auto;
             width: 100%;
+            align-items: center;
         }
 
-        /* Phần Vòng Quay */
+        /* ----- PHẦN VÒNG QUAY 3D ----- */
         .wheel-section {
-            flex: 1;
+            flex: 1.2;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
         }
 
-        .wheel-container {
+        /* Vành đai 3D ngoài cùng */
+        .wheel-outer-rim {
             position: relative;
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             aspect-ratio: 1/1;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #f0f5fa, #c9d0d8);
+            box-shadow:  25px 25px 50px #b8bfc7, 
+                        -25px -25px 50px #ffffff;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Viền lõm sát mâm quay */
+        .wheel-inner-rim {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #e0e5ec;
+            box-shadow: inset 10px 10px 20px #a3b1c6, 
+                        inset -10px -10px 20px #ffffff;
+            position: relative;
         }
 
         canvas {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            box-shadow: 0 0 20px rgba(0,0,0,0.15);
+            /* Đổ bóng cho chính canvas để tách biệt khỏi viền */
+            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.2));
             transition: transform 0.1s;
         }
 
-        /* Mũi tên chỉ vòng quay */
+        /* Mũi tên 3D */
         .pointer {
             position: absolute;
             top: 50%;
-            right: -20px;
+            right: -30px;
             transform: translateY(-50%);
-            width: 0;
-            height: 0;
-            border-top: 20px solid transparent;
-            border-bottom: 20px solid transparent;
-            border-right: 40px solid #e74c3c;
-            z-index: 5;
-            filter: drop-shadow(-2px 2px 2px rgba(0,0,0,0.2));
+            width: 60px;
+            height: 40px;
+            background: linear-gradient(145deg, #ff4757, #ff6b81);
+            clip-path: polygon(100% 50%, 0 0, 0 100%);
+            z-index: 15;
+            filter: drop-shadow(-5px 5px 5px rgba(0,0,0,0.3));
         }
 
-        /* Nút quay ở giữa */
+        /* Nút quay 3D ở giữa */
         .spin-btn {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            background-color: #ffffff;
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(145deg, #ffffff, #dcdcdc);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-weight: 800;
-            font-size: 18px;
+            font-weight: 900;
+            font-size: 20px;
             color: #2c3e50;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            z-index: 10;
+            border: 4px solid #fff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2),
+                        inset 0 -5px 10px rgba(0,0,0,0.1),
+                        inset 0 5px 10px rgba(255,255,255,1);
+            z-index: 20;
             user-select: none;
-            transition: background 0.2s, transform 0.1s;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .spin-btn:hover {
-            background-color: #f0f0f0;
             transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.25),
+                        inset 0 -5px 10px rgba(0,0,0,0.1),
+                        inset 0 5px 10px rgba(255,255,255,1);
         }
 
         .spin-btn:active {
-            transform: translate(-50%, -50%) scale(0.95);
+            transform: translate(-50%, -45%) scale(0.95);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2),
+                        inset 0 5px 10px rgba(0,0,0,0.2);
         }
 
-        /* Phần Nhập Tên */
+        /* ----- PHẦN NHẬP TÊN 3D ----- */
         .input-section {
-            width: 350px;
+            width: 400px;
             display: flex;
             flex-direction: column;
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            background: #e0e5ec;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow:  15px 15px 30px #b8bfc7, 
+                        -15px -15px 30px #ffffff;
         }
 
         .input-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
 
         .input-header h2 {
-            font-size: 18px;
+            font-size: 20px;
             color: #2c3e50;
+            font-weight: 800;
         }
 
         .count-badge {
-            background: #3498db;
+            background: linear-gradient(145deg, #3498db, #2980b9);
             color: white;
-            padding: 4px 10px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 800;
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.15);
         }
 
+        /* Textarea hiệu ứng chìm (Inset) */
         textarea {
             flex: 1;
             width: 100%;
-            border: 2px solid #e0e6ed;
-            border-radius: 8px;
-            padding: 15px;
+            height: 350px;
+            background: #e0e5ec;
+            border: none;
+            border-radius: 12px;
+            padding: 20px;
             font-size: 16px;
+            font-weight: 600;
+            color: #4a5568;
             resize: none;
             outline: none;
-            line-height: 1.5;
-            transition: border-color 0.3s;
+            line-height: 1.6;
+            box-shadow: inset 6px 6px 12px #a3b1c6, 
+                        inset -6px -6px 12px #ffffff;
+            transition: all 0.3s;
         }
 
         textarea:focus {
-            border-color: #3498db;
+            box-shadow: inset 8px 8px 15px #a3b1c6, 
+                        inset -8px -8px 15px #ffffff;
         }
 
         .controls {
-            margin-top: 15px;
+            margin-top: 25px;
             display: flex;
-            gap: 10px;
+            gap: 15px;
         }
 
+        /* Nút bấm 3D */
         .btn {
             flex: 1;
-            padding: 12px;
+            padding: 15px;
             border: none;
-            border-radius: 6px;
-            background-color: #2c3e50;
+            border-radius: 10px;
             color: white;
-            font-weight: 600;
+            font-weight: 800;
+            font-size: 15px;
+            text-transform: uppercase;
             cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn:hover {
-            background-color: #1a252f;
+            transition: all 0.2s;
+            position: relative;
         }
 
         .btn-shuffle {
-            background-color: #1abc9c;
+            background: linear-gradient(145deg, #1abc9c, #16a085);
+            box-shadow: 0 6px 0 #0e6655, 0 10px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-clear {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            box-shadow: 0 6px 0 #922b21, 0 10px 15px rgba(0,0,0,0.2);
         }
 
-        .btn-shuffle:hover {
-            background-color: #16a085;
+        .btn:active {
+            transform: translateY(6px);
+        }
+
+        .btn-shuffle:active {
+            box-shadow: 0 0px 0 #0e6655, 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .btn-clear:active {
+            box-shadow: 0 0px 0 #922b21, 0 2px 5px rgba(0,0,0,0.2);
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .container {
                 flex-direction: column;
-                align-items: center;
+                gap: 30px;
+                padding-bottom: 20px;
             }
             .input-section {
                 width: 100%;
-                max-width: 500px;
-                height: 300px;
+                max-width: 550px;
             }
-            .pointer {
-                right: -10px;
-                border-top: 15px solid transparent;
-                border-bottom: 15px solid transparent;
-                border-right: 30px solid #e74c3c;
+            textarea {
+                height: 200px;
             }
         }
     </style>
@@ -225,8 +279,10 @@
 
     <main class="container">
         <div class="wheel-section">
-            <div class="wheel-container">
-                <canvas id="canvas" width="600" height="600"></canvas>
+            <div class="wheel-outer-rim">
+                <div class="wheel-inner-rim">
+                    <canvas id="canvas" width="800" height="800"></canvas>
+                </div>
                 <div class="pointer"></div>
                 <div class="spin-btn" id="spin-btn">QUAY</div>
             </div>
@@ -234,30 +290,31 @@
 
         <div class="input-section">
             <div class="input-header">
-                <h2>Danh sách</h2>
+                <h2>Danh Sách Ứng Viên</h2>
                 <span class="count-badge" id="entry-count">0</span>
             </div>
             <textarea id="names-input" placeholder="Nhập tên vào đây, mỗi dòng 1 tên...">Khách hàng A
 Khách hàng B
 Khách hàng C
-Font Việt Linh
-Nguyễn Văn D
-Trần Thị E</textarea>
+Khách hàng D
+Thành viên E
+Thành viên F</textarea>
             <div class="controls">
                 <button class="btn btn-shuffle" id="shuffle-btn">Xáo trộn</button>
-                <button class="btn" id="clear-btn">Xóa hết</button>
+                <button class="btn btn-clear" id="clear-btn">Xóa hết</button>
             </div>
         </div>
     </main>
 
     <script>
+        // Set canvas resolution higher for crisp text
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const namesInput = document.getElementById('names-input');
         const entryCount = document.getElementById('entry-count');
         const spinBtn = document.getElementById('spin-btn');
         
-        // Bảng màu đẹp, tươi sáng
+        // Bảng màu rực rỡ, độ tương phản cao cho 3D
         const colors = [
             "#FF5A5F", "#3BCEAC", "#FFC857", "#2D93AD", 
             "#9B5DE5", "#F15BB5", "#00BBF9", "#00F5D4",
@@ -270,7 +327,6 @@ Trần Thị E</textarea>
         let spinVelocity = 0;
         let animationFrame;
 
-        // Lấy danh sách từ textarea
         function updateNames() {
             const text = namesInput.value;
             names = text.split('\n').map(n => n.trim()).filter(n => n.length > 0);
@@ -278,7 +334,7 @@ Trần Thị E</textarea>
             drawWheel();
         }
 
-        // Vẽ vòng quay
+        // Tạo hiệu ứng gradient nhẹ cho từng cung (tăng tính 3D)
         function drawWheel() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const centerX = canvas.width / 2;
@@ -288,7 +344,7 @@ Trần Thị E</textarea>
             if (names.length === 0) {
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-                ctx.fillStyle = '#e0e0e0';
+                ctx.fillStyle = '#cfd9df';
                 ctx.fill();
                 return;
             }
@@ -303,40 +359,51 @@ Trần Thị E</textarea>
                 ctx.beginPath();
                 ctx.moveTo(centerX, centerY);
                 ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                
+                // Tô màu trơn kết hợp viền để có độ sắc nét
                 ctx.fillStyle = colors[i % colors.length];
                 ctx.fill();
+                
+                // Vẽ viền chia cắt các ô
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
                 ctx.stroke();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#ffffff';
 
                 // Viết chữ
                 ctx.save();
                 ctx.translate(centerX, centerY);
                 ctx.rotate(startAngle + sliceAngle / 2);
                 ctx.textAlign = 'right';
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 22px "Be Vietnam Pro"';
+                ctx.textBaseline = 'middle';
                 
-                // Giới hạn độ dài chữ
+                // Đổ bóng chữ để dễ đọc hơn
+                ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetX = 1;
+                ctx.shadowOffsetY = 1;
+
+                ctx.fillStyle = '#ffffff';
+                // Font chữ lớn hơn do scale canvas 800x800
+                ctx.font = '800 32px "Be Vietnam Pro"';
+                
                 let text = names[i];
                 if (text.length > 20) text = text.substring(0, 18) + '...';
                 
-                ctx.fillText(text, radius - 30, 8);
+                ctx.fillText(text, radius - 45, 0);
                 ctx.restore();
             }
         }
 
-        // Logic Quay
         function spinWheel() {
             if (isSpinning || names.length === 0) return;
             isSpinning = true;
             
-            // Lực quay ngẫu nhiên
-            spinVelocity = Math.random() * 0.2 + 0.4; 
+            // Random lực xoay
+            spinVelocity = Math.random() * 0.2 + 0.45; 
             
             function animate() {
                 currentAngle += spinVelocity;
-                spinVelocity *= 0.985; // Lực cản (ma sát)
+                spinVelocity *= 0.983; // Tốc độ giảm dần
 
                 drawWheel();
 
@@ -351,33 +418,30 @@ Trần Thị E</textarea>
             animate();
         }
 
-        // Tính toán và hiển thị người chiến thắng
         function announceWinner() {
             const sliceAngle = (2 * Math.PI) / names.length;
-            // Tính toán góc chuẩn hóa (mũi tên ở vị trí 0 độ - bên phải)
             const normalizedAngle = (currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
             const winningIndex = Math.floor(((2 * Math.PI - normalizedAngle) % (2 * Math.PI)) / sliceAngle);
             const winner = names[winningIndex];
 
-            // Bắn pháo giấy
             confetti({
-                particleCount: 150,
-                spread: 80,
-                origin: { y: 0.6 },
-                colors: colors
+                particleCount: 200,
+                spread: 100,
+                origin: { y: 0.5 },
+                colors: colors,
+                zIndex: 9999
             });
 
-            // Hiện popup
             Swal.fire({
-                title: '🎉 CHÚC MỪNG 🎉',
-                html: `Người may mắn là:<br><strong style="font-size: 30px; color: #e74c3c;">${winner}</strong>`,
+                title: '🎉 XUẤT SẮC 🎉',
+                html: `Chúc mừng người may mắn:<br><br><strong style="font-size: 34px; color: #ff4757; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">${winner}</strong>`,
                 icon: 'success',
-                confirmButtonText: 'Tuyệt vời!',
-                confirmButtonColor: '#2c3e50'
+                confirmButtonText: 'Quay tiếp thôi!',
+                confirmButtonColor: '#2c3e50',
+                backdrop: `rgba(44, 62, 80, 0.6)`
             });
         }
 
-        // Các sự kiện (Events)
         namesInput.addEventListener('input', updateNames);
         spinBtn.addEventListener('click', spinWheel);
         
@@ -398,7 +462,13 @@ Trần Thị E</textarea>
             updateNames();
         });
 
-        // Khởi tạo ban đầu
+        // Tăng độ phân giải hiển thị trên màn hình Retina/High DPI
+        function scaleCanvas() {
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+        }
+        
+        scaleCanvas();
         updateNames();
     </script>
 </body>
