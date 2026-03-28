@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vòng Quay may mắn Font Việt Linh - 3D UI</title>
+    <title>Vòng Quay may mắn Font Việt Linh - Bản Phóng To</title>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -16,7 +16,6 @@
         }
 
         body {
-            /* Background nhám mờ chuẩn 3D UI */
             background-color: #e0e5ec;
             color: #2c3e50;
             display: flex;
@@ -26,18 +25,17 @@
         }
 
         header {
-            padding: 20px 30px;
+            padding: 15px 30px;
             text-align: center;
             z-index: 10;
-            margin-bottom: 10px;
         }
 
         header h1 {
             color: #2c3e50;
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             text-shadow: 3px 3px 6px rgba(163, 177, 198, 0.6), 
                         -3px -3px 6px rgba(255, 255, 255, 0.8);
         }
@@ -45,41 +43,435 @@
         .container {
             display: flex;
             flex: 1;
-            padding: 10px 30px 40px;
+            padding: 10px 40px 40px;
             gap: 50px;
-            max-width: 1300px;
+            max-width: 1600px;
             margin: 0 auto;
             width: 100%;
             align-items: center;
+            justify-content: center;
         }
 
-        /* ----- PHẦN VÒNG QUAY 3D ----- */
+        /* ----- PHẦN VÒNG QUAY KHỔNG LỒ ----- */
         .wheel-section {
-            flex: 1.2;
+            flex: 1; /* Chiếm toàn bộ không gian còn lại (hơn 2/3) */
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
         }
 
-        /* Vành đai 3D ngoài cùng */
         .wheel-outer-rim {
             position: relative;
             width: 100%;
-            max-width: 550px;
+            /* Giới hạn theo chiều cao màn hình để không bị lố thanh cuộn */
+            max-width: 85vh; 
             aspect-ratio: 1/1;
             border-radius: 50%;
             background: linear-gradient(145deg, #f0f5fa, #c9d0d8);
-            box-shadow:  25px 25px 50px #b8bfc7, 
-                        -25px -25px 50px #ffffff;
-            padding: 20px;
+            box-shadow:  30px 30px 60px #b8bfc7, 
+                        -30px -30px 60px #ffffff;
+            padding: 25px;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* Viền lõm sát mâm quay */
         .wheel-inner-rim {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #e0e5ec;
+            box-shadow: inset 15px 15px 30px #a3b1c6, 
+                        inset -15px -15px 30px #ffffff;
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            filter: drop-shadow(0 20px 25px rgba(0,0,0,0.25));
+            transition: transform 0.1s;
+        }
+
+        /* Mũi tên 3D (Được phóng to) */
+        .pointer {
+            position: absolute;
+            top: 50%;
+            right: -45px;
+            transform: translateY(-50%);
+            width: 80px;
+            height: 55px;
+            background: linear-gradient(145deg, #ff4757, #ff6b81);
+            clip-path: polygon(100% 50%, 0 0, 0 100%);
+            z-index: 15;
+            filter: drop-shadow(-8px 8px 8px rgba(0,0,0,0.3));
+        }
+
+        /* Nút quay 3D (Được phóng to) */
+        .spin-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 130px;
+            height: 130px;
+            background: linear-gradient(145deg, #ffffff, #dcdcdc);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 900;
+            font-size: 28px;
+            color: #2c3e50;
+            cursor: pointer;
+            border: 6px solid #fff;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25),
+                        inset 0 -8px 15px rgba(0,0,0,0.1),
+                        inset 0 8px 15px rgba(255,255,255,1);
+            z-index: 20;
+            user-select: none;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .spin-btn:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3),
+                        inset 0 -8px 15px rgba(0,0,0,0.1),
+                        inset 0 8px 15px rgba(255,255,255,1);
+        }
+
+        .spin-btn:active {
+            transform: translate(-50%, -45%) scale(0.95);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2),
+                        inset 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        /* ----- PHẦN NHẬP TÊN (CỘT NHỎ) ----- */
+        .input-section {
+            width: 320px; /* Thu nhỏ cột để nhường chỗ cho vòng quay */
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            background: #e0e5ec;
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow:  15px 15px 30px #b8bfc7, 
+                        -15px -15px 30px #ffffff;
+            height: 80vh; /* Kéo dài cột theo chiều dọc */
+            max-height: 800px;
+        }
+
+        .input-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .input-header h2 {
+            font-size: 18px;
+            color: #2c3e50;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .count-badge {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 800;
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.15);
+        }
+
+        textarea {
+            flex: 1;
+            width: 100%;
+            background: #e0e5ec;
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #4a5568;
+            resize: none;
+            outline: none;
+            line-height: 1.8;
+            box-shadow: inset 6px 6px 12px #a3b1c6, 
+                        inset -6px -6px 12px #ffffff;
+            transition: all 0.3s;
+        }
+
+        textarea:focus {
+            box-shadow: inset 8px 8px 15px #a3b1c6, 
+                        inset -8px -8px 15px #ffffff;
+        }
+
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column; /* Xếp dọc các nút để vừa với cột nhỏ */
+            gap: 15px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 800;
+            font-size: 16px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .btn-shuffle {
+            background: linear-gradient(145deg, #1abc9c, #16a085);
+            box-shadow: 0 6px 0 #0e6655, 0 10px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-clear {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            box-shadow: 0 6px 0 #922b21, 0 10px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:active {
+            transform: translateY(6px);
+        }
+
+        .btn-shuffle:active {
+            box-shadow: 0 0px 0 #0e6655, 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .btn-clear:active {
+            box-shadow: 0 0px 0 #922b21, 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+                gap: 40px;
+                padding-bottom: 20px;
+            }
+            .wheel-outer-rim {
+                max-width: 90vw;
+            }
+            .input-section {
+                width: 100%;
+                max-width: 600px;
+                height: 350px;
+            }
+            .controls {
+                flex-direction: row;
+            }
+            .pointer {
+                right: -25px;
+                width: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Vòng Quay may mắn Font Việt Linh</h1>
+    </header>
+
+    <main class="container">
+        <div class="wheel-section">
+            <div class="wheel-outer-rim">
+                <div class="wheel-inner-rim">
+                    <canvas id="canvas" width="1200" height="1200"></canvas>
+                </div>
+                <div class="pointer"></div>
+                <div class="spin-btn" id="spin-btn">QUAY</div>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <div class="input-header">
+                <h2>Danh Sách</h2>
+                <span class="count-badge" id="entry-count">0</span>
+            </div>
+            <textarea id="names-input" placeholder="Nhập tên vào đây, mỗi dòng 1 tên...">Khách hàng A
+Khách hàng B
+Khách hàng C
+Khách hàng D
+Thành viên E
+Thành viên F
+Thành viên G</textarea>
+            <div class="controls">
+                <button class="btn btn-shuffle" id="shuffle-btn">Xáo trộn</button>
+                <button class="btn btn-clear" id="clear-btn">Xóa hết</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const namesInput = document.getElementById('names-input');
+        const entryCount = document.getElementById('entry-count');
+        const spinBtn = document.getElementById('spin-btn');
+        
+        const colors = [
+            "#FF5A5F", "#3BCEAC", "#FFC857", "#2D93AD", 
+            "#9B5DE5", "#F15BB5", "#00BBF9", "#00F5D4",
+            "#FCA311", "#E01A4F", "#06D6A0", "#118AB2"
+        ];
+
+        let names = [];
+        let currentAngle = 0;
+        let isSpinning = false;
+        let spinVelocity = 0;
+        let animationFrame;
+
+        function updateNames() {
+            const text = namesInput.value;
+            names = text.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+            entryCount.innerText = names.length;
+            drawWheel();
+        }
+
+        function drawWheel() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width / 2;
+
+            if (names.length === 0) {
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.fillStyle = '#cfd9df';
+                ctx.fill();
+                return;
+            }
+
+            const sliceAngle = (2 * Math.PI) / names.length;
+
+            for (let i = 0; i < names.length; i++) {
+                const startAngle = currentAngle + i * sliceAngle;
+                const endAngle = startAngle + sliceAngle;
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fill();
+                
+                // Viền dày hơn do canvas lớn
+                ctx.lineWidth = 6;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(startAngle + sliceAngle / 2);
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                
+                ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+                ctx.shadowBlur = 6;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+
+                ctx.fillStyle = '#ffffff';
+                // Font chữ cực lớn cho độ phân giải 1200px
+                ctx.font = '800 44px "Be Vietnam Pro"';
+                
+                let text = names[i];
+                if (text.length > 22) text = text.substring(0, 20) + '...';
+                
+                ctx.fillText(text, radius - 60, 0);
+                ctx.restore();
+            }
+        }
+
+        function spinWheel() {
+            if (isSpinning || names.length === 0) return;
+            isSpinning = true;
+            
+            spinVelocity = Math.random() * 0.2 + 0.45; 
+            
+            function animate() {
+                currentAngle += spinVelocity;
+                spinVelocity *= 0.983; 
+
+                drawWheel();
+
+                if (spinVelocity > 0.002) {
+                    animationFrame = requestAnimationFrame(animate);
+                } else {
+                    isSpinning = false;
+                    cancelAnimationFrame(animationFrame);
+                    announceWinner();
+                }
+            }
+            animate();
+        }
+
+        function announceWinner() {
+            const sliceAngle = (2 * Math.PI) / names.length;
+            const normalizedAngle = (currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+            const winningIndex = Math.floor(((2 * Math.PI - normalizedAngle) % (2 * Math.PI)) / sliceAngle);
+            const winner = names[winningIndex];
+
+            confetti({
+                particleCount: 250,
+                spread: 120,
+                origin: { y: 0.5 },
+                colors: colors,
+                zIndex: 9999
+            });
+
+            Swal.fire({
+                title: '🎉 XUẤT SẮC 🎉',
+                html: `Chúc mừng người may mắn:<br><br><strong style="font-size: 38px; color: #ff4757; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">${winner}</strong>`,
+                icon: 'success',
+                confirmButtonText: 'Quay tiếp thôi!',
+                confirmButtonColor: '#2c3e50',
+                backdrop: `rgba(44, 62, 80, 0.6)`
+            });
+        }
+
+        namesInput.addEventListener('input', updateNames);
+        spinBtn.addEventListener('click', spinWheel);
+        
+        document.getElementById('shuffle-btn').addEventListener('click', () => {
+            if(isSpinning) return;
+            let arr = namesInput.value.split('\n').filter(n => n.trim() !== '');
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            namesInput.value = arr.join('\n');
+            updateNames();
+        });
+
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            if(isSpinning) return;
+            namesInput.value = '';
+            updateNames();
+        });
+
+        function scaleCanvas() {
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+        }
+        
+        scaleCanvas();
+        updateNames();
+    </script>
+</body>
+</html>        .wheel-inner-rim {
             width: 100%;
             height: 100%;
             border-radius: 50%;
