@@ -20,12 +20,12 @@
             color: #2c3e50;
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            min-height: 100vh;
             overflow-x: hidden;
         }
 
         header {
-            padding: 15px 30px;
+            padding: 15px 20px;
             text-align: center;
             z-index: 10;
         }
@@ -59,12 +59,14 @@
             justify-content: center;
             align-items: center;
             position: relative;
+            width: 100%;
         }
 
         .wheel-outer-rim {
             position: relative;
             width: 100%;
-            max-width: 85vh; 
+            /* Tự động tính toán để không bao giờ bị tràn viền màn hình ngang hoặc dọc */
+            max-width: min(90vw, 75vh); 
             aspect-ratio: 1/1;
             border-radius: 50%;
             background: linear-gradient(145deg, #f0f5fa, #c9d0d8);
@@ -106,11 +108,10 @@
             clip-path: polygon(0 50%, 100% 0, 100% 100%);
             z-index: 15;
             filter: drop-shadow(-8px 8px 8px rgba(0,0,0,0.3));
-            transition: transform 0.05s ease-out; /* Hiệu ứng nảy mũi tên */
+            transition: transform 0.05s ease-out; 
             transform-origin: right center;
         }
 
-        /* Khi mũi tên nảy lên */
         .pointer.tick {
             transform: translateY(-50%) rotate(15deg);
         }
@@ -251,35 +252,51 @@
             transform: translateY(6px);
         }
 
-        .btn-shuffle:active {
-            box-shadow: 0 0px 0 #0e6655, 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .btn-clear:active {
-            box-shadow: 0 0px 0 #922b21, 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
+        /* ==========================================
+           GIAO DIỆN TỰ ĐỘNG CHO ĐIỆN THOẠI (RESPONSIVE) 
+           ========================================== */
+        @media (max-width: 800px) {
+            header { padding: 10px 15px; }
+            header h1 { font-size: 24px; }
+            
             .container {
                 flex-direction: column;
-                gap: 40px;
-                padding-bottom: 20px;
+                gap: 30px;
+                padding: 10px 15px 30px;
             }
+
             .wheel-outer-rim {
-                max-width: 90vw;
+                padding: 15px; /* Giảm viền ngoài trên đt */
             }
+
+            /* Thu nhỏ mũi tên cho cân đối với vòng quay đt */
+            .pointer {
+                right: -20px;
+                width: 55px;
+                height: 40px;
+            }
+
+            /* Thu nhỏ nút quay để không che mất số/chữ */
+            .spin-btn {
+                width: 90px;
+                height: 90px;
+                font-size: 20px;
+                border-width: 4px;
+            }
+
             .input-section {
                 width: 100%;
-                max-width: 600px;
-                height: 350px;
+                max-width: 500px;
+                height: 400px; /* Giảm chiều cao khung nhập trên đt */
+                padding: 20px;
             }
+
             .controls {
-                flex-direction: row;
+                flex-direction: row; /* Dàn hàng ngang 2 nút cho tiết kiệm diện tích */
             }
-            .pointer {
-                right: -25px;
-                width: 60px;
+            .btn {
+                padding: 12px;
+                font-size: 14px;
             }
         }
     </style>
@@ -306,13 +323,12 @@
                 <h2>Danh Sách</h2>
                 <span class="count-badge" id="entry-count">0</span>
             </div>
-            <textarea id="names-input" placeholder="Nhập tên vào đây, mỗi dòng 1 tên...">Khách hàng A
-Khách hàng B
-Khách hàng C
-Khách hàng D
-Thành viên E
-Thành viên F
-Thành viên G</textarea>
+            <textarea id="names-input" placeholder="Nhập tên vào đây, mỗi dòng 1 tên...">45
+46
+47
+48
+49
+50</textarea>
             <div class="controls">
                 <button class="btn btn-shuffle" id="shuffle-btn">Xáo trộn</button>
                 <button class="btn btn-clear" id="clear-btn">Xóa hết</button>
@@ -339,13 +355,12 @@ Thành viên G</textarea>
         let isSpinning = false;
         let spinVelocity = 0;
         let animationFrame;
-        let lastPassedIndex = -1; // Biến theo dõi ô vừa đi qua để phát âm thanh
+        let lastPassedIndex = -1; 
 
-        // ----- HỆ THỐNG ÂM THANH (KHÔNG CẦN FILE MP3) -----
+        // ----- HỆ THỐNG ÂM THANH -----
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const audioCtx = new AudioContext();
 
-        // Âm thanh tích tắc khi quay
         function playTickSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
@@ -363,16 +378,13 @@ Thành viên G</textarea>
             osc.start(audioCtx.currentTime);
             osc.stop(audioCtx.currentTime + 0.05);
 
-            // Hiệu ứng mũi tên nảy lên
             pointer.classList.add('tick');
             setTimeout(() => { pointer.classList.remove('tick'); }, 50);
         }
 
-        // Âm thanh khi chiến thắng (Hợp âm rộn ràng)
         function playWinSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            // Các tần số tạo thành một hợp âm chiến thắng
-            const chords = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            const chords = [523.25, 659.25, 783.99, 1046.50]; 
             chords.forEach((freq, index) => {
                 setTimeout(() => {
                     const osc = audioCtx.createOscillator();
@@ -389,10 +401,9 @@ Thành viên G</textarea>
                     
                     osc.start(audioCtx.currentTime);
                     osc.stop(audioCtx.currentTime + 1.5);
-                }, index * 80); // Phát liên tiếp tạo hiệu ứng Tada!
+                }, index * 80); 
             });
         }
-        // --------------------------------------------------
 
         function updateNames() {
             const text = namesInput.value;
@@ -444,17 +455,18 @@ Thành viên G</textarea>
                 ctx.shadowOffsetY = 2;
 
                 ctx.fillStyle = '#ffffff';
-                ctx.font = '800 44px "Be Vietnam Pro"';
+                // ĐÃ TĂNG FONT CHỮ LÊN 65px ĐỂ HIỂN THỊ RÕ TRÊN ĐIỆN THOẠI
+                ctx.font = '800 65px "Be Vietnam Pro"';
                 
                 let text = names[i];
                 if (text.length > 22) text = text.substring(0, 20) + '...';
                 
-                ctx.fillText(text, radius - 60, 0);
+                // Đẩy chữ lùi vào trong một chút (radius - 75) để không bị viền cắt ngang
+                ctx.fillText(text, radius - 75, 0);
                 ctx.restore();
             }
         }
 
-        // Tính toán vị trí hiện tại của mũi tên
         function getCurrentIndex() {
             if (names.length === 0) return -1;
             const sliceAngle = (2 * Math.PI) / names.length;
@@ -465,20 +477,18 @@ Thành viên G</textarea>
         function spinWheel() {
             if (isSpinning || names.length === 0) return;
             
-            // Kích hoạt AudioContext khi người dùng tương tác (quy định của trình duyệt)
             if (audioCtx.state === 'suspended') audioCtx.resume();
             
             isSpinning = true;
-            spinVelocity = Math.random() * 0.2 + 0.5; // Tăng lực xoay nhẹ cho đã
+            spinVelocity = Math.random() * 0.2 + 0.5; 
             lastPassedIndex = getCurrentIndex();
             
             function animate() {
                 currentAngle += spinVelocity;
-                spinVelocity *= 0.985; // Lực ma sát làm chậm dần
+                spinVelocity *= 0.985; 
 
                 drawWheel();
 
-                // Kiểm tra xem mũi tên có chuyển sang ô mới không để phát tiếng
                 let currentIndex = getCurrentIndex();
                 if (currentIndex !== lastPassedIndex) {
                     playTickSound();
@@ -499,10 +509,8 @@ Thành viên G</textarea>
         function announceWinner() {
             const winner = names[getCurrentIndex()];
 
-            // Phát âm thanh chiến thắng
             playWinSound();
 
-            // Hiệu ứng pháo giấy rực rỡ
             confetti({
                 particleCount: 250,
                 spread: 120,
