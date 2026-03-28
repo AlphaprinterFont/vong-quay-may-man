@@ -225,21 +225,22 @@
                         inset -8px -8px 15px #ffffff;
         }
 
+        /* Bố cục nút dạng Lưới (Grid) để chứa vừa 3 nút */
         .controls {
             margin-top: 25px;
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
 
         .btn {
             width: 100%;
-            padding: 16px;
+            padding: 14px;
             border: none;
             border-radius: 12px;
             color: white;
             font-weight: 800;
-            font-size: 16px;
+            font-size: 14px;
             text-transform: uppercase;
             cursor: pointer;
             transition: all 0.2s;
@@ -247,8 +248,17 @@
         }
 
         .btn-shuffle {
+            grid-column: span 2; /* Nút xáo trộn chiếm 2 cột (rộng toàn phần) */
             background: linear-gradient(145deg, #1abc9c, #16a085);
             box-shadow: 0 6px 0 #0e6655, 0 10px 15px rgba(0,0,0,0.2);
+            font-size: 16px;
+            padding: 16px;
+        }
+
+        /* Nút Mặc Định mới (Màu Cam) */
+        .btn-reset {
+            background: linear-gradient(145deg, #f39c12, #d35400);
+            box-shadow: 0 6px 0 #a04000, 0 10px 15px rgba(0,0,0,0.2);
         }
         
         .btn-clear {
@@ -259,6 +269,10 @@
         .btn:active {
             transform: translateY(6px);
         }
+
+        .btn-shuffle:active { box-shadow: 0 0px 0 #0e6655, 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-reset:active { box-shadow: 0 0px 0 #a04000, 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-clear:active { box-shadow: 0 0px 0 #922b21, 0 2px 5px rgba(0,0,0,0.2); }
 
         /* ----- PHẦN LIÊN KẾT ----- */
         .links-section {
@@ -336,16 +350,17 @@
             }
 
             .input-section {
-                height: 400px; 
+                height: 450px; 
                 padding: 20px;
             }
 
+            /* Không đổi thành hàng ngang nữa vì đang dùng Grid */
             .controls {
-                flex-direction: row; 
+                gap: 10px;
             }
             .btn {
                 padding: 12px;
-                font-size: 14px;
+                font-size: 13px;
             }
         }
     </style>
@@ -373,20 +388,10 @@
                     <h2>Danh Sách</h2>
                     <span class="count-badge" id="entry-count">0</span>
                 </div>
-                <textarea id="names-input" placeholder="Nhập tên vào đây, mỗi dòng 1 tên...">Tý
-Sửu
-Dần
-Mão
-Thìn
-Tỵ
-Ngọ
-Mùi
-Thân
-Dậu
-Tuất
-Hợi</textarea>
+                <textarea id="names-input" placeholder="Nhập tên vào đây, mỗi dòng 1 tên..."></textarea>
                 <div class="controls">
-                    <button class="btn btn-shuffle" id="shuffle-btn">Xáo trộn</button>
+                    <button class="btn btn-shuffle" id="shuffle-btn">Xáo trộn danh sách</button>
+                    <button class="btn btn-reset" id="reset-btn">Mặc định</button>
                     <button class="btn btn-clear" id="clear-btn">Xóa hết</button>
                 </div>
             </div>
@@ -419,10 +424,15 @@ Hợi</textarea>
         let animationFrame;
         let lastPassedIndex = -1; 
 
-        // ----- TẢI DỮ LIỆU TỪ LẦN TRƯỚC (NẾU CÓ) -----
+        // ----- DANH SÁCH MẶC ĐỊNH & LƯU TRỮ -----
+        const defaultNames = "Tý\nSửu\nDần\nMão\nThìn\nTỵ\nNgọ\nMùi\nThân\nDậu\nTuất\nHợi";
         const savedData = localStorage.getItem('fontVietLinh_wheelData');
+        
         if (savedData !== null) {
             namesInput.value = savedData;
+        } else {
+            namesInput.value = defaultNames;
+            localStorage.setItem('fontVietLinh_wheelData', defaultNames);
         }
 
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -477,7 +487,6 @@ Hợi</textarea>
             names = text.split('\n').map(n => n.trim()).filter(n => n.length > 0);
             entryCount.innerText = names.length;
             
-            // TỰ ĐỘNG LƯU DANH SÁCH VÀO TRÌNH DUYỆT MỖI KHI CÓ SỰ THAY ĐỔI
             localStorage.setItem('fontVietLinh_wheelData', text);
             
             drawWheel();
@@ -603,7 +612,7 @@ Hợi</textarea>
                 if (result.isConfirmed) {
                     names.splice(winnerIndex, 1);
                     namesInput.value = names.join('\n');
-                    updateNames(); // Việc gọi hàm này cũng sẽ kích hoạt lưu tự động danh sách mới
+                    updateNames(); 
                 }
             });
         }
@@ -625,9 +634,29 @@ Hợi</textarea>
         document.getElementById('clear-btn').addEventListener('click', () => {
             if(isSpinning) return;
             namesInput.value = '';
-            // Nút "Xóa hết" giờ chỉ xóa danh sách chứ không khôi phục mặc định
-            // Nếu muốn khôi phục mặc định 12 con giáp, người dùng chỉ cần F5 lại 1 lần sau khi xóa hết
             updateNames();
+        });
+
+        // ----- SỰ KIỆN NÚT MẶC ĐỊNH -----
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            if(isSpinning) return;
+            
+            Swal.fire({
+                title: 'Khôi phục mặc định?',
+                text: 'Danh sách hiện tại sẽ bị xóa và thay bằng 12 con giáp.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Khôi phục',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#f39c12',
+                cancelButtonColor: '#2c3e50',
+                backdrop: `rgba(44, 62, 80, 0.6)`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    namesInput.value = defaultNames;
+                    updateNames();
+                }
+            });
         });
 
         function scaleCanvas() {
