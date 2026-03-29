@@ -101,7 +101,6 @@
             position: absolute;
             top: 50%;
             right: -35px;
-            /* Thiết lập góc xoay gốc là 0deg để JS dễ dàng điều khiển độ nảy */
             transform: translateY(-50%) rotate(0deg);
             width: 80px;
             height: 55px;
@@ -416,8 +415,7 @@
         let isSpinning = false;
         let spinVelocity = 0;
         let animationFrame;
-        
-        // Quản lý animation mũi tên
+        let lastPassedIndex = -1; 
         let tickTimeout;
 
         const defaultNames = "Tý\nSửu\nDần\nMão\nThìn\nTỵ\nNgọ\nMùi\nThân\nDậu\nTuất\nHợi";
@@ -440,7 +438,6 @@
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
             
-            // Giảm độ chói của âm thanh tạch tạch để nghe mượt tai hơn
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(400, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.03);
@@ -451,7 +448,7 @@
             osc.start(audioCtx.currentTime);
             osc.stop(audioCtx.currentTime + 0.03);
 
-            // Xử lý nảy mũi tên bằng Javascript để không bị rớt khung hình (drop frame)
+            // Xử lý nảy mũi tên bằng Javascript 
             pointer.style.transform = 'translateY(-50%) rotate(15deg)';
             clearTimeout(tickTimeout);
             tickTimeout = setTimeout(() => {
@@ -558,34 +555,33 @@
             
             isSpinning = true;
             
-            // THIẾT LẬP TỐC ĐỘ: Nhanh và dài (Luôn dao động từ 10 - 11 giây mỗi lần quay)
-            spinVelocity = Math.random() * 0.15 + 0.45; 
+            // Thiết lập tốc độ cực nhanh, mạnh mẽ giống vòng 1
+            spinVelocity = Math.random() * 0.15 + 0.6; 
             
-            let previousAngle = currentAngle;
+            // Theo dõi vị trí hiện tại để phát âm thanh
+            lastPassedIndex = getCurrentIndex();
             
             function animate() {
-                previousAngle = currentAngle;
                 currentAngle += spinVelocity;
                 
-                // LỰC MA SÁT: Đã được căn chỉnh cực kỳ chuẩn xác
-                spinVelocity *= 0.991; 
+                // Giảm tốc từ từ để vòng quay kéo dài
+                spinVelocity *= 0.988; 
 
                 drawWheel();
 
-                // THUẬT TOÁN ÂM THANH MỚI: Đếm số vạch kẻ đi qua thay vì chỉ số Index
-                const sliceAngle = (2 * Math.PI) / names.length;
-                const currentSliceCount = currentAngle / sliceAngle;
-                const prevSliceCount = previousAngle / sliceAngle;
-                
-                // Nếu góc quay vượt qua 1 đường kẻ trắng -> Phát âm thanh
-                if (Math.floor(currentSliceCount) > Math.floor(prevSliceCount)) {
+                // KIỂM TRA PHÁT ÂM THANH MƯỢT MÀ
+                let currentIndex = getCurrentIndex();
+                if (currentIndex !== lastPassedIndex) {
                     playTickSound();
+                    lastPassedIndex = currentIndex;
                 }
 
                 if (spinVelocity > 0.002) {
                     animationFrame = requestAnimationFrame(animate);
                 } else {
                     isSpinning = false;
+                    // FIX LỖI TÍCH LŨY: Đưa góc về mức an toàn khi dừng lại
+                    currentAngle = currentAngle % (2 * Math.PI);
                     cancelAnimationFrame(animationFrame);
                     announceWinner();
                 }
