@@ -225,7 +225,6 @@
                         inset -8px -8px 15px #ffffff;
         }
 
-        /* Bố cục nút dạng Lưới (Grid) để chứa vừa 3 nút */
         .controls {
             margin-top: 25px;
             display: grid;
@@ -248,14 +247,13 @@
         }
 
         .btn-shuffle {
-            grid-column: span 2; /* Nút xáo trộn chiếm 2 cột (rộng toàn phần) */
+            grid-column: span 2;
             background: linear-gradient(145deg, #1abc9c, #16a085);
             box-shadow: 0 6px 0 #0e6655, 0 10px 15px rgba(0,0,0,0.2);
             font-size: 16px;
             padding: 16px;
         }
 
-        /* Nút Mặc Định mới (Màu Cam) */
         .btn-reset {
             background: linear-gradient(145deg, #f39c12, #d35400);
             box-shadow: 0 6px 0 #a04000, 0 10px 15px rgba(0,0,0,0.2);
@@ -354,7 +352,6 @@
                 padding: 20px;
             }
 
-            /* Không đổi thành hàng ngang nữa vì đang dùng Grid */
             .controls {
                 gap: 10px;
             }
@@ -424,7 +421,6 @@
         let animationFrame;
         let lastPassedIndex = -1; 
 
-        // ----- DANH SÁCH MẶC ĐỊNH & LƯU TRỮ -----
         const defaultNames = "Tý\nSửu\nDần\nMão\nThìn\nTỵ\nNgọ\nMùi\nThân\nDậu\nTuất\nHợi";
         const savedData = localStorage.getItem('fontVietLinh_wheelData');
         
@@ -558,12 +554,16 @@
             if (audioCtx.state === 'suspended') audioCtx.resume();
             
             isSpinning = true;
-            spinVelocity = Math.random() * 0.2 + 0.5; 
+            
+            // TĂNG TỐC ĐỘ BAN ĐẦU (từ 0.5 lên 0.8) để quay nhanh và mạnh hơn
+            spinVelocity = Math.random() * 0.3 + 0.8; 
             lastPassedIndex = getCurrentIndex();
             
             function animate() {
                 currentAngle += spinVelocity;
-                spinVelocity *= 0.985; 
+                
+                // GIẢM MA SÁT (từ 0.985 thành 0.992) để vòng quay lâu hơn
+                spinVelocity *= 0.992; 
 
                 drawWheel();
 
@@ -573,7 +573,8 @@
                     lastPassedIndex = currentIndex;
                 }
 
-                if (spinVelocity > 0.0015) {
+                // Dừng lại khi vận tốc nhỏ hơn mức này
+                if (spinVelocity > 0.002) {
                     animationFrame = requestAnimationFrame(animate);
                 } else {
                     isSpinning = false;
@@ -637,7 +638,6 @@
             updateNames();
         });
 
-        // ----- SỰ KIỆN NÚT MẶC ĐỊNH -----
         document.getElementById('reset-btn').addEventListener('click', () => {
             if(isSpinning) return;
             
